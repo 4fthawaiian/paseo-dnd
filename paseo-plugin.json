@@ -1,0 +1,9 @@
+{
+  "id": "paseo-dnd",
+  "name": "DND.exe",
+  "description": "Type /dnd in any agent session to roll up a dedicated text adventure — a fresh agent on your session's provider/model, with a live HP & inventory card.",
+  "media": [],
+  "requirements": {
+    "paseo": ">=0.12.0"
+  }
+}
