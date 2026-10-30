@@ -13,8 +13,10 @@ import {
   transformDndTurn,
 } from "./client/turn";
 import { inspectTimelineRpc } from "./shared/inspect";
+import { setRpc } from "./client/rpc";
 
 export default function contribute(client: PluginClientContext) {
+  setRpc(client.rpc.bind(client));
   client.addSlashCommand({
     name: "dnd",
     description: "Roll up a text adventure in a fresh agent session",
@@ -42,6 +44,16 @@ export default function contribute(client: PluginClientContext) {
           error: error instanceof Error ? error.message : String(error),
         });
       }
+      ctx.openPanel("adventure");
+    },
+  });
+
+  client.addSlashCommand({
+    name: "dndsheet",
+    description: "Open your character sheet",
+    argumentHint: "",
+    context: "agent",
+    async onSubmit(ctx) {
       ctx.openPanel("adventure");
     },
   });

@@ -4,6 +4,7 @@ import type {
 } from "@getpaseo/plugin/server";
 import type { JsonValue } from "@getpaseo/protocol/agent-types";
 import { inspectTimelineRpc } from "./shared/inspect";
+import { getSheetRpc } from "./shared/sheet";
 import { STATE_MARKER, ROLL_MARKER, MAP_MARKER, MAP_END } from "./shared/dnd";
 import {
   outcomeMessage,
@@ -118,6 +119,18 @@ export default function contribute(server: PluginServerContext) {
   server.handle(inspectTimelineRpc, async (input, { paseo }) =>
     inspectTimeline(input.agentId, paseo),
   );
+
+  server.handle(getSheetRpc, async (input) => {
+    const record = await loadRecord(input.agentId);
+    return {
+      found: record != null,
+      agentId: input.agentId,
+      state: record?.latest ?? null,
+      turnCount: record?.turnCount ?? 0,
+      createdAt: record?.createdAt ?? null,
+      updatedAt: record?.updatedAt ?? null,
+    };
+  });
 
   server.on("agent.turn_ended", async (event, { paseo }) => {
     const handle = paseo.agents.ref(event.agent.id);

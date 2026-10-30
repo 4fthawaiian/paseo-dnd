@@ -62,6 +62,22 @@ current, always after the newest reply.
   and entities as colored cells — with the DM's legend as chips underneath.
   Not raw ASCII in a code block.
 
+## Character sheet
+
+Type `/dndsheet` in a game session (or open the Adventure panel) for the
+live character sheet — powered by the canonical store, refreshing as turns
+land:
+
+- Name, class, and ancestry with a level badge
+- HP bar, XP progress bar, AC
+- Six ability scores with computed modifiers
+- Status effects, full inventory, current location, turn count
+
+The DM carries the data in optional `⟦STATE⟧` keys (`name`, `class`,
+`ancestry`, `ac`, `stats`, `xpToNext`), so it fills in as soon as your
+character exists — and the sheet works on games that started before the
+fields did, it just waits for the DM to start sending them.
+
 ## Table talk
 
 You can talk to the DM out of turn, like a real table. Bracket the message

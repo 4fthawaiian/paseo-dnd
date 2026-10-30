@@ -6,18 +6,25 @@ import { z } from "zod";
 import { STATE_MARKER } from "../shared/dnd";
 
 const NumOrNull = z.coerce.number().nullish().catch(null);
+const StrOrNull = z.string().nullish().catch(null);
 const StrList = z.array(z.string()).nullish().catch(null);
 
-const StateSchema = z
+export const StateSchema = z
   .object({
+    name: StrOrNull,
+    class: StrOrNull,
+    ancestry: StrOrNull,
     hp: NumOrNull,
     maxHp: NumOrNull,
+    ac: NumOrNull,
     level: NumOrNull,
     xp: NumOrNull,
+    xpToNext: NumOrNull,
     gold: NumOrNull,
-    location: z.string().nullish().catch(null),
+    location: StrOrNull,
     inventory: StrList,
     status: StrList,
+    stats: z.record(z.string(), z.coerce.number()).nullish().catch(null),
   })
   .nullish()
   .catch(null);
@@ -116,6 +123,15 @@ function StateCard({ state, theme }: { state: NonNullable<GameState>; theme: Plu
         gap: 10,
       }}
     >
+      {state.name ? (
+        <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: "700" }}>
+          {state.name}
+          {state.class || state.ancestry
+            ? ` — ${[state.class, state.ancestry].filter(Boolean).join(" · ")}`
+            : ""}
+        </Text>
+      ) : null}
+
       {state.location ? (
         <Text style={{ color: colors.foregroundMuted, fontSize: 12 }}>
           ◆ {state.location}
