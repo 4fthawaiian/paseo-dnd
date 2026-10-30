@@ -117,6 +117,17 @@ client/            spawn logic, Adventure panel, timeline card components
 server/            (contract files live in shared/)
 ```
 
+## Trust notes
+
+- The game agent inherits the source session's **mode and permissions** —
+  "you have no tools" is a prompt instruction, not a sandbox. Choose the
+  session you `/dnd` from accordingly.
+- `/dndprobe` (diagnostics) writes short timeline previews to the local
+  daemon log.
+- Per-agent saves live on the daemon host under
+  `~/.paseo/plugin-settings/paseo-dnd/saves/`; nothing leaves the machine
+  except what your provider already sees.
+
 ## Known wart
 
 The client-side timeline transformer that would hide the raw `⟦STATE⟧` text
