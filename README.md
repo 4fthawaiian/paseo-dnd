@@ -48,7 +48,7 @@ co-op).
 ## Install
 
 ```bash
-paseo plugin add https://github.com/bem/paseo-dnd
+paseo plugin add https://github.com/4fthawaiian/paseo-dnd
 # or from a local checkout:
 paseo plugin add /path/to/paseo-dnd
 ```

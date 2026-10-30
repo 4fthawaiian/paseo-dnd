@@ -38,7 +38,9 @@ function parseState(text: string): JsonValue | null {
   }
 }
 
-function parseMap(text: string): { title: string | null; grid: string[] } | null {
+function parseMap(
+  text: string,
+): { title: string | null; grid: string[]; legend: { glyph: string; label: string }[] } | null {
   const start = text.indexOf(MAP_MARKER);
   if (start === -1) return null;
   const after = text.slice(start + MAP_MARKER.length);
@@ -56,7 +58,18 @@ function parseMap(text: string): { title: string | null; grid: string[] } | null
     .map((l) => l.replace(/\s+$/, ""))
     .filter((l) => l.length > 0);
   if (!grid.length) return null;
-  return { title, grid };
+  // Legend lines live between ⟦/MAP⟧ and ⟦STATE⟧: "X label — Y label — ..."
+  const legend: { glyph: string; label: string }[] = [];
+  if (endIdx !== -1) {
+    let tail = rest.slice(endIdx + MAP_END.length);
+    const sIdx = tail.indexOf(STATE_MARKER);
+    if (sIdx !== -1) tail = tail.slice(0, sIdx);
+    for (const part of tail.split(/\s+[—–-]\s+|\n+/)) {
+      const m = /^\s*(\S)\s+(.+?)\s*$/.exec(part);
+      if (m) legend.push({ glyph: m[1], label: m[2].slice(0, 40) });
+    }
+  }
+  return { title, grid, legend };
 }
 
 function resyncMessage(record: { latest: JsonValue }): string {
@@ -189,7 +202,7 @@ export default function contribute(server: PluginServerContext) {
                 id: mapId,
                 kind: "dnd-map",
                 version: 1,
-                data: { title: map.title, grid: map.grid },
+                data: { title: map.title, grid: map.grid, legend: map.legend },
               });
             } catch (error) {
               console.log(`[paseo-dnd] map card failed: ${String(error)}`);

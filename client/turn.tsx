@@ -36,6 +36,9 @@ export const CardSchema = z.object({
 export const MapSchema = z.object({
   title: z.string().nullish().catch(null),
   grid: z.array(z.string()).catch([]),
+  legend: z
+    .array(z.object({ glyph: z.string().catch(""), label: z.string().catch("") }))
+    .catch([]),
 });
 
 /** Schema for daemon-appended `dnd-roll` dice cards. */
@@ -194,22 +197,38 @@ export function StateCardRow({ item, theme }: PluginTimelineItemProps<z.output<t
   return item.data.state ? <StateCard state={item.data.state} theme={theme} /> : null;
 }
 
-const MONO_FONT = Platform.OS === "ios" ? "Menlo" : "monospace";
+const CELL = 18;
 
-function mapCharColor(ch: string, colors: PluginTheme["colors"]): string {
-  if (ch === "@" || ch === "P") return colors.accent;
-  if ("#█▓|_=-".includes(ch)) return colors.foregroundMuted;
-  if ("<>^v+✚*$!".includes(ch)) return colors.statusSuccess;
-  if ("~".includes(ch)) return colors.statusWarning;
-  if (/[0-9]/.test(ch)) return colors.statusWarning;
-  if (/[A-Z]/.test(ch)) return colors.statusDanger;
-  return colors.foreground;
+function cellStyle(ch: string, colors: PluginTheme["colors"]) {
+  const base = {
+    width: CELL,
+    height: CELL,
+    borderRadius: 3,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    backgroundColor: colors.surface2,
+  };
+  if (ch === "." || ch === " " || ch === "\u00b7")
+    return { ...base, opacity: 0.35 };
+  if (ch === "@" || ch === "P")
+    return { ...base, backgroundColor: colors.accent };
+  if ("#\u2588\u2593".includes(ch))
+    return { ...base, backgroundColor: colors.foregroundMuted };
+  if ("<>^v".includes(ch))
+    return { ...base, backgroundColor: colors.statusSuccess };
+  if ("~".includes(ch))
+    return { ...base, backgroundColor: colors.statusWarning };
+  if (/[A-Z0-9]/.test(ch))
+    return { ...base, backgroundColor: colors.statusDanger };
+  return base;
 }
 
 export function MapCardRow({ item, theme }: PluginTimelineItemProps<z.output<typeof MapSchema>>) {
   const colors = theme.colors;
-  const { title, grid } = item.data;
+  const { title, grid, legend } = item.data;
   if (!grid.length) return null;
+  const glyphOf = (ch: string) =>
+    ch === "@" || /[A-Z]/.test(ch) || "<>^v".includes(ch) ? ch : "";
   return (
     <View
       style={{
@@ -219,31 +238,71 @@ export function MapCardRow({ item, theme }: PluginTimelineItemProps<z.output<typ
         borderWidth: 1,
         borderRadius: 12,
         padding: 12,
-        gap: 8,
+        gap: 10,
       }}
     >
       {title ? (
         <Text style={{ color: colors.foregroundMuted, fontSize: 12 }}>◆ {title}</Text>
       ) : null}
-      <View style={{ alignSelf: "flex-start" }}>
+      <View
+        style={{
+          alignSelf: "flex-start",
+          backgroundColor: colors.surface0,
+          borderColor: colors.border,
+          borderWidth: 1,
+          borderRadius: 8,
+          padding: 6,
+          gap: 1,
+        }}
+      >
         {grid.map((row, i) => (
-          <Text
-            key={i}
-            style={{
-              fontFamily: MONO_FONT,
-              fontSize: 13,
-              lineHeight: 15,
-              letterSpacing: 1,
-            }}
-          >
-            {[...row].map((ch, j) => (
-              <Text key={j} style={{ color: mapCharColor(ch, colors) }}>
-                {ch === " " ? " " : ch}
-              </Text>
-            ))}
-          </Text>
+          <View key={i} style={{ flexDirection: "row", gap: 1 }}>
+            {[...row].map((ch, j) => {
+              const label = glyphOf(ch);
+              return (
+                <View key={j} style={cellStyle(ch, colors)}>
+                  {label ? (
+                    <Text style={{ color: colors.surface0, fontSize: 11, fontWeight: "800" }}>
+                      {label}
+                    </Text>
+                  ) : null}
+                </View>
+              );
+            })}
+          </View>
         ))}
       </View>
+      {legend && legend.length > 0 ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+          {legend.map((l, i) => (
+            <View
+              key={i}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+                borderColor: colors.border,
+                borderWidth: 1,
+                borderRadius: 999,
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+              }}
+            >
+              <View
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: 3,
+                  backgroundColor: cellStyle(l.glyph, colors).backgroundColor,
+                }}
+              />
+              <Text style={{ color: colors.foregroundMuted, fontSize: 11 }}>
+                {l.label}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }

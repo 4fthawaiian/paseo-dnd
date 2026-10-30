@@ -29,5 +29,9 @@
     "zod": "^4.4.3"
   },
   "description": "Type /dnd in any Paseo session to roll up a dedicated text adventure — real dice, live state card, ASCII maps.",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/4fthawaiian/paseo-dnd.git"
+  }
 }
